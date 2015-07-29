@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" sizes="192x192" href="point_tracker.png">
+<title>Point Tracker</title>
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<script src="http://underscorejs.org/underscore-min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/1.1.26/howler.min.js"></script>
+<style>
+    @import url('http://fonts.googleapis.com/css?family=Alike');
+    html, body {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+    }
+    body {
+        background: black;
+        color: white;
+        display: flex;
+        display: -webkit-flex; /* Safari */
+        font-family: 'Alike';
+        font-size: 3vw;
+    }
+    .player-container {
+        width: 55%;
+        height: 100%;
+        box-sizing: border-box;
+        margin: 0px;
+        display: flex;
+        display: -webkit-flex; /* Safari */
+        justify-content: center;
+        -webkit-justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        -webkit-flex-direction: column;
+    }
+    .controls {
+        width: 10%;
+        height: 100%;
+        box-sizing: border-box;
+        margin: 0px;
+        display: flex;
+        display: -webkit-flex; /* Safari */
+        justify-content: center;
+        -webkit-justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        -webkit-flex-direction: column;
+    }
+    .controls > * {
+        display: flex;
+        display: -webkit-flex; /* Safari */
+        justify-content: center;
+        -webkit-justify-content: center;
+        align-items: center;
+        margin: 1px;
+        width: 5.5vw;
+        height: 5.5vw;
+    }
+    #config-pane {
+        position: absolute;
+        top: 50%;
+        margin-top: -20vw;
+        left: 0;
+        right: 0;
+        text-align: center;
+    }
+    .hidden {
+        display: none;
+    }
+    .starting-points {
+        cursor: pointer;
+        padding: 2vw;
+        width: 5vw;
+        display: inline-block;
+        text-align: center;
+        font-size: 5vw;
+    }
+    .center-column {
+        display: inline-block;
+        min-width: 22vw;
+        max-width: 25vw;
+        text-align: center;
+    }
+    .side-column {
+        display: inline-block;
+        width: 10vw;
+        text-align: center;
+    }
+    .fa {
+        font-size: 70%;
+        vertical-align: 15%;
+    }
+    .id-plus, .id-minus, .id-plus5, .id-minus5, #reset, #flip, #configure {
+        cursor: pointer;
+    }
+    .circle-button {
+        font-size: 80%;
+        font-weight: bold;
+        vertical-align:10%;
+        border-radius:50%;
+        background:white;
+        color:black;
+        width:6vw;
+        height:6vw;
+        display:inline-block
+    }
+    @keyframes to_right {
+        from {transform: rotate(0deg);}
+        to {transform: rotate(90deg);}
+    }
+    @-webkit-keyframes to_right {
+        from {transform: rotate(0deg);}
+        to {transform: rotate(90deg);}
+    }
+    @keyframes to_left {
+        from {transform: rotate(0deg);}
+        to {transform: rotate(-90deg);}
+    }
+    @-webkit-keyframes to_left {
+        from {transform: rotate(0deg);}
+        to {transform: rotate(-90deg);}
+    }
+    #flip {
+        animation-duration: 2s;
+        -webkit-animation-duration: 2s;
+    }
+    .right {
+        animation-name: to_right;
+        -webkit-animation-name: to_right;
+        transform: rotate(90deg);
+    }
+    .left {
+        animation-name: to_left;
+        -webkit-animation-name: to_left;
+        transform: rotate(-90deg);
+    }
+    @keyframes fade {
+        from {opacity: 1;}
+        to {opacity: 0;}
+    }
+    @-webkit-keyframes fade {
+        from {opacity: 1;}
+        to {opacity: 0;}
+    }
+    .fade {
+        animation-name: fade;
+        -webkit-animation-name: fade;
+        animation-duration: 2.5s;
+        -webkit-animation-duration: 2.5s;
+        animation-timing-function: ease-in;
+        -webkit-animation-timing-function: ease-in;
+    }
+    .highlighted {
+        border: 1px solid white;
+        border-radius: 50%;
+        margin: 0px;
+    }
+</style>
+<script>
+var click = new Howl({urls:["point_tracker.ogg"], volume: 0.3});
+var StoredVal = function(name, deflt) {
+    function get() {
+        var stored = window.localStorage.getItem(name);
+        if (stored === null) return deflt;
+        return JSON.parse(stored);
+    }
+    function set(value) {
+        window.localStorage.setItem(name, JSON.stringify(value));
+    }
+    function increase(delta) {
+        return set(get() + delta);
+    }
+    return {get: get, set: set, increase: increase};
+};
+var startingPoints = StoredVal("startingPoints", 20);
+function PlayerController(root, id) {
+    function e(name) {
+        return root.getElementsByClassName("id-"+name)[0];
+    }
+    var score = StoredVal("player" + id + "score", startingPoints.get());
+    var delta;
+    var timeoutId = null;
+    function changeScore(amount) {
+        score.increase(amount);
+        delta += amount;
+        click.play();
+        if (score.get() <= 0)
+        window.setTimeout(function() {window.navigator.vibrate(30);}, 50);
+        refresh();
+        window.clearTimeout(timeoutId);
+        e('delta').classList.remove("fade");
+        window.setTimeout(function() {
+            e('delta').classList.add("fade");
+        }, 20);
+        timeoutId = window.setTimeout(function() {
+            e('delta').classList.remove("fade");
+            delta = 0;
+            refresh()
+        }, 2500);
+    }
+    function reset() {
+        score.set(startingPoints.get());
+        delta = 0;
+        refresh();
+    }
+    function refresh() {
+        e('score').textContent = score.get();
+        e('delta').textContent = (delta > 0 ? "+":" ") + (delta || "");
+    }
+    e('plus').onclick = _.partial(changeScore, 1);
+    e('minus').onclick = _.partial(changeScore, -1);
+    e('plus5').onclick = _.partial(changeScore, 5);
+    e('minus5').onclick = _.partial(changeScore, -5);
+    refresh();
+    return {reset: reset};
+}
+function BaseController() {
+    var playerControllers = [];
+    var leftWonFlip = StoredVal("leftWonFlip");
+    e = document.getElementById.bind(document);
+    function reset() {
+        playerControllers.forEach(function(p) { p.reset() });
+        flip();
+    }
+    function flip() {
+        e('flip').classList.remove(leftWonFlip.get()?"left":"right");
+        leftWonFlip.set(Math.random() < 0.5);
+        window.setTimeout(function() {
+            e('flip').classList.add(leftWonFlip.get()?'left':'right');
+        }, 20);
+    }
+    window.addEventListener("load", function() {
+        e('right').innerHTML = e('left').innerHTML;
+        [0,10,20,30,40,50,60,70,80,90].forEach(function (sp) {
+            var el = document.createElement("span");
+            el.textContent = sp;
+            el.onclick = function() {
+                startingPoints.set(sp);
+                e('config-pane').classList.add('hidden');
+                e('configure').classList.remove('highlighted');
+                reset();
+            };
+            el.classList.add("starting-points");
+            e('config-pane').appendChild(el)
+        });
+        e('configure').onclick = function(evt) {
+            e('configure').classList.toggle('highlighted');
+            e('config-pane').classList.toggle('hidden');
+            e('reset').classList.remove("highlighted");
+            e('reset').onclick = prepReset;
+            evt.stopPropagation()
+        };
+        playerControllers.push(PlayerController(e('left'), 'left'));
+        playerControllers.push(PlayerController(e('right'), 'right'));
+        function prepReset(evt) {
+            e('reset').classList.add("highlighted");
+            e('reset').onclick = function() {
+                e('reset').classList.remove("highlighted");
+                e('reset').onclick = prepReset;
+                reset();
+            };
+            evt.stopPropagation();
+            e('configure').classList.remove('highlighted');
+            e('config-pane').classList.add('hidden');
+        };
+        e('body').onclick = function() {
+            e('reset').classList.remove("highlighted");
+            e('reset').onclick = prepReset;
+            e('configure').classList.remove('highlighted');
+            e('config-pane').classList.add('hidden');
+        };
+        e('reset').onclick = prepReset;
+        e('flip').onclick = flip;
+        if (leftWonFlip.get() === undefined) {
+            flip();
+        }
+        else {
+            e('flip').classList.add(leftWonFlip.get()?'left':'right');
+        }
+    });
+}
+BaseController();
+</script>
+</head>
+<body id="body">
+    <div class="player-container" id="left">
+        <div style="font-size:580%";>
+            <span class="side-column id-minus">
+                <i class="fa fa-minus-circle"></i>
+            </span
+            ><span class="center-column id-score"></span
+            ><span class="side-column id-plus">
+                <i class="fa fa-plus-circle"></i>
+            </span>
+        </div>
+        <div style="font-size:200%";>
+            <span class="side-column id-minus5">
+                <span class="circle-button">-5</span>
+            </span
+            ><span class="center-column id-delta"></span
+            ><span class="side-column id-plus5">
+                <span class="circle-button">+5</span>
+            </span>
+        </div>
+    </div><div class="controls" style="font-size:200%">
+        <div id="configure"><i class="fa fa-wrench"></i></div>
+        <div id="reset"><i class="fa fa-refresh"></i></div>
+        <div><i class="fa fa-arrow-circle-up" id="flip"></i></div>
+    </div><div
+        class="player-container" id="right">
+    </div>
+    <div id="config-pane" class="hidden">
+    </div>
+</body>
+</html>
