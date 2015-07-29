@@ -117,16 +117,16 @@
         to {transform: rotate(90deg);}
     }
     @-webkit-keyframes to_right {
-        from {transform: rotate(0deg);}
-        to {transform: rotate(90deg);}
+        from {-webkit-transform: rotate(0deg);}
+        to {-webkit-transform: rotate(90deg);}
     }
     @keyframes to_left {
         from {transform: rotate(0deg);}
         to {transform: rotate(-90deg);}
     }
     @-webkit-keyframes to_left {
-        from {transform: rotate(0deg);}
-        to {transform: rotate(-90deg);}
+        from {-webkit-transform: rotate(0deg);}
+        to {-webkit-transform: rotate(-90deg);}
     }
     #flip {
         animation-duration: 2s;
@@ -136,11 +136,13 @@
         animation-name: to_right;
         -webkit-animation-name: to_right;
         transform: rotate(90deg);
+        -webkit-transform: rotate(90deg);
     }
     .left {
         animation-name: to_left;
         -webkit-animation-name: to_left;
         transform: rotate(-90deg);
+        -webkit-transform: rotate(-90deg);
     }
     @keyframes fade {
         from {opacity: 1;}
@@ -173,7 +175,12 @@ var StoredVal = function(name, deflt) {
         return JSON.parse(stored);
     }
     function set(value) {
-        window.localStorage.setItem(name, JSON.stringify(value));
+		var iOS = ( navigator.userAgent.match(/iPad|iPhone|iPod/g) ? true : false );
+		if (iOS == false) {
+			window.localStorage.setItem(name, JSON.stringify(value));
+		} else {
+			deflt = value;
+		}
     }
     function increase(delta) {
         return set(get() + delta);
@@ -219,7 +226,7 @@ function PlayerController(root, id) {
     e('minus').onclick = _.partial(changeScore, -1);
     e('plus5').onclick = _.partial(changeScore, 5);
     e('minus5').onclick = _.partial(changeScore, -5);
-    refresh();
+	reset();
     return {reset: reset};
 }
 function BaseController() {
