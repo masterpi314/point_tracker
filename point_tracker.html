@@ -193,7 +193,7 @@ function PlayerController(root, id) {
         return root.getElementsByClassName("id-"+name)[0];
     }
     var score = StoredVal("player" + id + "score", startingPoints.get());
-    var delta;
+    var delta = 0;
     var timeoutId = null;
     function changeScore(amount) {
         score.increase(amount);
@@ -226,7 +226,7 @@ function PlayerController(root, id) {
     e('minus').onclick = _.partial(changeScore, -1);
     e('plus5').onclick = _.partial(changeScore, 5);
     e('minus5').onclick = _.partial(changeScore, -5);
-	reset();
+	refresh();
     return {reset: reset};
 }
 function BaseController() {
