@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="http://underscorejs.org/underscore-min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/1.1.26/howler.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.5.0/NoSleep.min.js"></script>
 <style>
     @import url('http://fonts.googleapis.com/css?family=Alike');
     html, body {
@@ -292,6 +293,8 @@ function BaseController() {
         else {
             e('flip').classList.add(leftWonFlip.get()?'left':'right');
         }
+	var noSleep = new NoSleep();
+	noSleep.enable();
     });
 }
 BaseController();
