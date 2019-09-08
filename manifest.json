@@ -3,7 +3,7 @@
   "name": "Point Tracker",
   "icons": [
     {
-      "src": "./icon.png",
+      "src": "./point_tracker.png",
       "type": "image/png",
       "sizes": "192x192"
     }
