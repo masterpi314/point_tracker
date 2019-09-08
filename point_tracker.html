@@ -100,7 +100,7 @@
         font-size: 70%;
         vertical-align: 15%;
     }
-    .id-plus, .id-minus, .id-plus5, .id-minus5, #reset, #flip, #configure {
+    .id-plus, .id-minus, .id-plus5, .id-minus5, #reset, #flip, #configure, #fullscreen {
         cursor: pointer;
     }
     .circle-button {
@@ -260,8 +260,6 @@ function BaseController() {
             noSleep.enable();
         }, false);
 
-        window.screen.orientation.lock("landscape");
-
         e('right').innerHTML = e('left').innerHTML;
         [0,10,20,30,40,50,60,70,80,90].forEach(function (sp) {
             var el = document.createElement("span");
@@ -282,6 +280,10 @@ function BaseController() {
             e('reset').onclick = prepReset;
             evt.stopPropagation()
         };
+        e('fullscreen').onclick = function(evt) {
+            document.documentElement.requestFullScreen();
+            window.screen.orientation.lock("landscape");
+        }
         playerControllers.push(PlayerController(e('left'), 'left'));
         playerControllers.push(PlayerController(e('right'), 'right'));
         function prepReset(evt) {
@@ -338,6 +340,7 @@ BaseController();
         <div id="configure"><i class="fa fa-wrench"></i></div>
         <div id="reset"><i class="fa fa-refresh"></i></div>
         <div><i class="fa fa-arrow-circle-up" id="flip"></i></div>
+        <div id="fullscreen"><i class="fa fa-fullscreen"></i></div>
     </div><div
         class="player-container" id="right">
     </div>
