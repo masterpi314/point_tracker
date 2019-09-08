@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="http://underscorejs.org/underscore-min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/1.1.26/howler.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.5.0/NoSleep.min.js"></script>
+<script src="https://raw.githubusercontent.com/richtr/NoSleep.js/v0.9.0/dist/NoSleep.min.js"></script>
 <style>
     @import url('http://fonts.googleapis.com/css?family=Alike');
     html, body {
@@ -169,6 +169,7 @@
 </style>
 <script>
 var click = new Howl({urls:["point_tracker.ogg"], volume: 0.3});
+var noSleep = new NoSleep();
 var StoredVal = function(name, deflt) {
     function get() {
         var stored = window.localStorage.getItem(name);
@@ -234,6 +235,7 @@ function BaseController() {
     var playerControllers = [];
     var leftWonFlip = StoredVal("leftWonFlip");
     e = document.getElementById.bind(document);
+
     function reset() {
         playerControllers.forEach(function(p) { p.reset() });
         flip();
@@ -246,6 +248,13 @@ function BaseController() {
         }, 20);
     }
     window.addEventListener("load", function() {
+        // Enable wake lock.
+        // (must be wrapped in a user input event handler e.g. a mouse or touch handler)
+        document.addEventListener('click', function enableNoSleep() {
+            document.removeEventListener('click', enableNoSleep, false);
+            noSleep.enable();
+        }, false);
+
         e('right').innerHTML = e('left').innerHTML;
         [0,10,20,30,40,50,60,70,80,90].forEach(function (sp) {
             var el = document.createElement("span");
@@ -293,8 +302,6 @@ function BaseController() {
         else {
             e('flip').classList.add(leftWonFlip.get()?'left':'right');
         }
-	var noSleep = new NoSleep();
-	noSleep.enable();
     });
 }
 BaseController();
