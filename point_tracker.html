@@ -202,8 +202,12 @@ function PlayerController(root, id) {
         score.increase(amount);
         delta += amount;
         click.play();
-        if (score.get() <= 0)
-        window.navigator && window.navigator.vibrate(30);
+        if (score.get() <= 0) {
+            window.navigator.vibrate && window.navigator.vibrate(30);
+        }
+        else {
+            window.navigator.vibrate && window.navigator.vibrate(1);
+        }
         refresh();
         window.clearTimeout(timeoutId);
         e('delta').classList.remove("fade");
