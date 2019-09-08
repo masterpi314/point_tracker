@@ -281,7 +281,7 @@ function BaseController() {
             evt.stopPropagation()
         };
         e('fullscreen').onclick = function(evt) {
-            document.documentElement.requestFullScreen();
+            document.documentElement.requestFullscreen();
             window.screen.orientation.lock("landscape");
         }
         playerControllers.push(PlayerController(e('left'), 'left'));
@@ -340,7 +340,7 @@ BaseController();
         <div id="configure"><i class="fa fa-wrench"></i></div>
         <div id="reset"><i class="fa fa-refresh"></i></div>
         <div><i class="fa fa-arrow-circle-up" id="flip"></i></div>
-        <div id="fullscreen"><i class="fa fa-fullscreen"></i></div>
+        <div id="fullscreen"><i class="fa fa-arrows-alt"></i></div>
     </div><div
         class="player-container" id="right">
     </div>
