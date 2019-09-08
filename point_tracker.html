@@ -203,7 +203,7 @@ function PlayerController(root, id) {
         delta += amount;
         click.play();
         if (score.get() <= 0)
-        window.setTimeout(function() {window.navigator.vibrate(100);}, 50);
+        window.setTimeout(function() {window.navigator.vibrate(1000);}, 50);
         refresh();
         window.clearTimeout(timeoutId);
         e('delta').classList.remove("fade");
