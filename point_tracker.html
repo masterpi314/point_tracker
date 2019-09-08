@@ -281,17 +281,18 @@ function BaseController() {
             evt.stopPropagation()
         };
         e('fullscreen').onclick = function goFullscreen(evt) {
-            document.documentElement.requestFullscreen();
-            window.screen.orientation.lock("landscape");
-            const icon = e('fullscreen').firstChild;
-            icon.classList.add("fa-compress");
-            icon.classList.remove("fa-expand");
-            e('fullscreen').onclick = function(evt) {
-                document.exitFullscreen();
-                icon.classList.add("fa-expand");
-                icon.classList.remove("fa-compress");
-                e('fullscreen').onclick = goFullscreen;
-            }
+            document.documentElement.requestFullscreen().then(function() {
+                window.screen.orientation.lock("landscape");
+                const icon = e('fullscreen').firstChild;
+                icon.classList.add("fa-compress");
+                icon.classList.remove("fa-expand");
+                e('fullscreen').onclick = function(evt) {
+                    document.exitFullscreen();
+                    icon.classList.add("fa-expand");
+                    icon.classList.remove("fa-compress");
+                    e('fullscreen').onclick = goFullscreen;
+                }
+            });
         }
         playerControllers.push(PlayerController(e('left'), 'left'));
         playerControllers.push(PlayerController(e('right'), 'right'));
